@@ -14,11 +14,13 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 
 @Composable
-fun AudioPlayerComposable(mediaUri: Uri) {
+fun AudioPlayerComposable(mediaUris: List<Uri>, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
-            setMediaItem(MediaItem.fromUri(mediaUri))
+            mediaUris.forEach { uri ->
+                addMediaItem(MediaItem.fromUri(uri))
+            }
             prepare()
             playWhenReady = true
         }
@@ -37,7 +39,7 @@ fun AudioPlayerComposable(mediaUri: Uri) {
                 // Customize PlayerView Attributes here
             }
         },
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize()
     )
 }
 
@@ -45,7 +47,8 @@ fun AudioPlayerComposable(mediaUri: Uri) {
 @Composable
 fun AudioPlayerPreview() {
     val videoUri = Uri.parse(
-        "https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny/BigBuckBunny_320x180.mp4"
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
     )
-    AudioPlayerComposable(mediaUri = videoUri)
+    val videoUris = List(1) { videoUri } // Wrapping the single URI in a list for the preview
+    AudioPlayerComposable(mediaUris = videoUris)
 }

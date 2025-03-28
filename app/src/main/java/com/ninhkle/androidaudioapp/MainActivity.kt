@@ -1,49 +1,57 @@
 package com.ninhkle.androidaudioapp
 
-import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.ninhkle.androidaudioapp.audio_player.AudioPlayerComposable
+import com.ninhkle.androidaudioapp.audio_player.fetchMediaFile
 import com.ninhkle.androidaudioapp.ui.theme.AndroidAudioAppTheme
+import com.ninhkle.androidaudioapp.utils.checkAndRequestPermissions
+import com.ninhkle.androidaudioapp.utils.handlePermissionResult
 
 class MainActivity : ComponentActivity() {
+    private val tag = "MainActivity"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(tag, "onCreate called")
         enableEdgeToEdge()
+        checkAndRequestPermissions(this) {
+            Log.d(tag, "Permission granted callback")
+            loadContent()
+        }
+    }
+
+    private fun loadContent() {
+        Log.d(tag, "Loading content")
         setContent {
             AndroidAudioAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    val videoUri = Uri.parse(
-                        "https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny/BigBuckBunny_320x180.mp4"
-                    )
-                    AudioPlayerComposable(mediaUri = videoUri)
+                    val mediaUris = fetchMediaFile(this)
+                    Log.d(tag, "Media URIs fetched: ${mediaUris.size}")
+                    AudioPlayerComposable(mediaUris = mediaUris, modifier = Modifier.padding(innerPadding))
                 }
             }
         }
     }
-}
 
-//@Composable
-//fun Greeting(name: String, modifier: Modifier = Modifier) {
-//    Text(
-//        text = "Hello $name!",
-//        modifier = modifier
-//    )
-//}
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun GreetingPreview() {
-//    AndroidAudioAppTheme {
-//        Greeting("Android")
-//    }
-//}
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+        deviceId: Int
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId)
+        Log.d(tag, "onRequestPermissionsResult called")
+        handlePermissionResult(requestCode, grantResults, {
+            Log.d(tag, "Permission result callback")
+            loadContent()
+        }, this )
+    }
+}
