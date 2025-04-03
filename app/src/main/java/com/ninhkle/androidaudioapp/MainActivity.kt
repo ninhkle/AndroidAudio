@@ -33,9 +33,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidAudioAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    val mediaUris = fetchMediaFile(this)
-                    Log.d(tag, "Media URIs fetched: ${mediaUris.size}")
-                    AudioPlayerComposable(mediaUris = mediaUris, modifier = Modifier.padding(innerPadding))
+                    val mediaItem = fetchMediaFile(this)
+                    Log.d(tag, "Media items fetched: ${mediaItem.size}")
+                    AudioPlayerComposable(mediaItems = mediaItem, modifier = Modifier.padding(innerPadding))
                 }
             }
         }

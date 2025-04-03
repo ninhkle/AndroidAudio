@@ -46,6 +46,7 @@ dependencies {
     implementation(libs.androidx.media3.session)     // MediaSession support
     implementation(libs.androidx.media3.common)
     // ... other dependencies ...
+    implementation(libs.coil.compose)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
