@@ -11,9 +11,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import com.ninhkle.androidaudioapp.audio_player.AudioPlayerComposable
 import com.ninhkle.androidaudioapp.audio_player.fetchMediaFile
-import com.ninhkle.androidaudioapp.ui.theme.AndroidAudioAppTheme
-import com.ninhkle.androidaudioapp.utils.checkAndRequestPermissions
-import com.ninhkle.androidaudioapp.utils.handlePermissionResult
+import com.ninhkle.androidaudioapp.core.theme.AndroidAudioAppTheme
+import com.ninhkle.androidaudioapp.core.util.checkAndRequestPermissions
+import com.ninhkle.androidaudioapp.core.util.handlePermissionResult
 
 class MainActivity : ComponentActivity() {
     private val tag = "MainActivity"

@@ -1,4 +1,4 @@
-package com.ninhkle.androidaudioapp.ui.theme
+package com.ninhkle.androidaudioapp.core.theme
 
 import androidx.compose.ui.graphics.Color
 

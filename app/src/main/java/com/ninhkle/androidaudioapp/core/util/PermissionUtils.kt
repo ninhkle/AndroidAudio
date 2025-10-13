@@ -1,4 +1,4 @@
-package com.ninhkle.androidaudioapp.utils
+package com.ninhkle.androidaudioapp.core.util
 
 import android.Manifest
 import android.app.Activity
@@ -20,7 +20,8 @@ fun checkAndRequestPermissions(activity: Activity, onPermissionGranted: () -> Un
             ActivityCompat.requestPermissions(
                 activity,
                 arrayOf(Manifest.permission.READ_MEDIA_AUDIO),
-                REQUEST_READ_MEDIA_AUDIO)
+                REQUEST_READ_MEDIA_AUDIO
+            )
         } else {
             onPermissionGranted()
         }
