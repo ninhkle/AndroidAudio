@@ -20,11 +20,14 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(tag, "onCreate called")
-        enableEdgeToEdge()
-        checkAndRequestPermissions(this) {
-            Log.d(tag, "Permission granted callback")
-            loadContent()
+//        Log.d(tag, "onCreate called")
+//        enableEdgeToEdge()
+//        checkAndRequestPermissions(this) {
+//            Log.d(tag, "Permission granted callback")
+//            loadContent()
+//        }
+        setContent {
+            AudioPlayerApp()
         }
     }
 
