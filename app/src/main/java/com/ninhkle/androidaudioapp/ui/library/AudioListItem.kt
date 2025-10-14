@@ -1,6 +1,5 @@
-package com.ninhkle.androidaudioapp.audio_library.ui
+package com.ninhkle.androidaudioapp.ui.library
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +11,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.ninhkle.androidaudioapp.audio_library.data.model.Audio
+import com.ninhkle.androidaudioapp.common.data.Audio
 
 @Composable
 fun AudioListItem(
@@ -44,21 +44,27 @@ fun AudioListItem(
                 .padding(end = 12.dp)
         )
 
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = audio.title,
-                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyLarge,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = audio.artist,
-                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         }
+
+        Text(
+            text = audio.formattedDuration(),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
 
         IconButton(
             onClick = { onPlayClick(audio) },
@@ -71,13 +77,6 @@ fun AudioListItem(
     }
 }
 
-@SuppressLint("DefaultLocale")
-private fun Long.toFormattedTime(): String {
-    val minutes = (this / 1000) / 60
-    val seconds = (this / 1000) % 60
-    return String.format("%02d:%02d", minutes, seconds)
-}
-
 @Preview
 @Composable
 fun PreviewAudioListItem() {
@@ -86,8 +85,12 @@ fun PreviewAudioListItem() {
             id = 1L,
             title = "Sample Song",
             artist = "Sample Artist",
+            album = "Sample Album",
             duration = 180000L,
-            uri = ""
-        )
+            uri = "",
+            albumId = 1L
+        ),
+        onPlayClick = {},
+        onItemClick = {},
     )
 }

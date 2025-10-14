@@ -4,16 +4,14 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import com.ninhkle.androidaudioapp.audio_player.AudioPlayerComposable
-import com.ninhkle.androidaudioapp.audio_player.fetchMediaFile
-import com.ninhkle.androidaudioapp.core.theme.AndroidAudioAppTheme
-import com.ninhkle.androidaudioapp.core.util.checkAndRequestPermissions
-import com.ninhkle.androidaudioapp.core.util.handlePermissionResult
+import com.ninhkle.androidaudioapp.ui.player.AudioPlayerComposable
+import com.ninhkle.androidaudioapp.ui.player.fetchMediaFile
+import com.ninhkle.androidaudioapp.common.theme.AndroidAudioAppTheme
+import com.ninhkle.androidaudioapp.common.util.handlePermissionResult
 
 class MainActivity : ComponentActivity() {
     private val tag = "MainActivity"

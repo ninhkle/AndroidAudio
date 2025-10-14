@@ -1,4 +1,4 @@
-package com.ninhkle.androidaudioapp.audio_player
+package com.ninhkle.androidaudioapp.ui.player
 
 import android.net.Uri
 import androidx.compose.foundation.Image

@@ -1,4 +1,4 @@
-package com.ninhkle.androidaudioapp.core.theme
+package com.ninhkle.androidaudioapp.common.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

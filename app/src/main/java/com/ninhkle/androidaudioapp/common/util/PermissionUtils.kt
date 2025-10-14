@@ -1,4 +1,4 @@
-package com.ninhkle.androidaudioapp.core.util
+package com.ninhkle.androidaudioapp.common.util
 
 import android.Manifest
 import android.app.Activity

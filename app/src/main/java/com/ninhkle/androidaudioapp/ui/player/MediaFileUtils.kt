@@ -1,4 +1,4 @@
-package com.ninhkle.androidaudioapp.audio_player
+package com.ninhkle.androidaudioapp.ui.player
 
 import android.Manifest
 import android.app.Activity
