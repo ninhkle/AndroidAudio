@@ -30,13 +30,12 @@ import com.ninhkle.androidaudioapp.common.data.Audio
 fun AudioListItem(
     audio: Audio,
     modifier: Modifier = Modifier,
-    onItemClick: (Audio) -> Unit = {},
-    onPlayClick: (Audio) -> Unit = {},
+    onPlayClick: (Audio) -> Unit,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onItemClick(audio) }
+            .clickable { onPlayClick(audio) }
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -101,6 +100,5 @@ fun PreviewAudioListItem() {
             albumId = 1L
         ),
         onPlayClick = {},
-        onItemClick = {},
     )
 }

@@ -29,7 +29,9 @@ import com.ninhkle.androidaudioapp.common.data.Audio
 
 
 @Composable
-fun AudioLibraryScreen() {
+fun AudioLibraryScreen(
+    onNavigateToPlayer: (Audio, List<Audio>) -> Unit
+) {
     val context = LocalContext.current
     val viewModel : AudioLibraryViewModel = remember {
         AudioLibraryViewModel.create(context)
@@ -37,7 +39,9 @@ fun AudioLibraryScreen() {
     val state = viewModel.state.value
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
     ) {
         Row {
             Text(
@@ -83,8 +87,9 @@ fun AudioLibraryScreen() {
             else -> {
                 AudioList(
                     audioList = state.audioList,
-                    onItemClick = viewModel::onAudioItemClick,
-                    onPlayClick = viewModel::onPlayClick
+                    onPlayClick = { audio ->
+                        onNavigateToPlayer(audio, state.audioList)
+                    }
                 )
             }
         }
@@ -106,7 +111,7 @@ fun AudioList(
             AudioListItem(
                 audio = audio,
                 onItemClick = onItemClick,
-                onPlayClick = onPlayClick
+                onPlayClick = { onPlayClick(audio) }
             )
             HorizontalDivider()
         }
@@ -116,5 +121,5 @@ fun AudioList(
 @Preview
 @Composable
 fun PreviewAudioLibraryScreen() {
-    AudioLibraryScreen()
+    AudioLibraryScreen(onNavigateToPlayer = { _, _ -> })
 }

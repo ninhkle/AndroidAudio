@@ -45,15 +45,6 @@ class AudioLibraryViewModel(context: Context) : ViewModel() {
         }
     }
 
-    fun onAudioItemClick(audio: Audio) {
-        // Handle item click, e.g., navigate to detail screen
-        println("Clicked on: ${audio.title} by ${audio.artist}")
-    }
-
-    fun onPlayClick(audio: Audio) {
-        // Handle play button click, e.g., start playback
-        println("Playing: ${audio.title} by ${audio.artist}")
-    }
 
     fun refresh() {
         loadAudioFile()

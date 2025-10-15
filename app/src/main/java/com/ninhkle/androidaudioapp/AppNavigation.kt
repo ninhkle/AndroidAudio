@@ -5,5 +5,7 @@ import com.ninhkle.androidaudioapp.ui.library.AudioLibraryScreen
 
 @Composable
 fun AppNavigation() {
-    AudioLibraryScreen()
+    AudioLibraryScreen(onNavigateToPlayer = { _, _ ->
+
+    })
 }
