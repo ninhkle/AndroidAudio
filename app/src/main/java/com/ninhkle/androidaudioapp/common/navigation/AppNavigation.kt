@@ -12,10 +12,6 @@ import com.ninhkle.androidaudioapp.ui.library.AudioLibraryViewModel
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    val context = LocalContext.current
-    val audioLibraryViewModel : AudioLibraryViewModel = remember {
-        AudioLibraryViewModel.create(context)
-    }
 
     NavHost(
         navController = navController,
@@ -23,7 +19,6 @@ fun AppNavigation() {
     ) {
         audioPlayerGraph(
             navController = navController,
-            audioLibraryViewModel = audioLibraryViewModel
         )
     }
 }

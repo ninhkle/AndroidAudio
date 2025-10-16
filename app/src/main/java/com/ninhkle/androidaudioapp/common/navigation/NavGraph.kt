@@ -1,5 +1,7 @@
 package com.ninhkle.androidaudioapp.common.navigation
 
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
@@ -8,15 +10,14 @@ import androidx.navigation.navArgument
 import com.ninhkle.androidaudioapp.common.data.Audio
 import com.ninhkle.androidaudioapp.ui.library.AudioLibraryScreen
 import com.ninhkle.androidaudioapp.ui.library.AudioLibraryViewModel
+import com.ninhkle.androidaudioapp.ui.library.AudioLibraryViewModelFactory
 import com.ninhkle.androidaudioapp.ui.player.PlayerScreen
 
 fun NavGraphBuilder.audioPlayerGraph(
-    navController: NavController,
-    audioLibraryViewModel: AudioLibraryViewModel
+    navController: NavController
 ) {
     composable(route = Screen.AudioLibrary.route) {
         AudioLibraryScreen(
-            viewModel = audioLibraryViewModel,
             onNavigateToPlayer = { audio, playlist ->
                 // Navigate to player with arguments
                 navController.navigate(Screen.AudioPlayer.createRoute(audio.id))
@@ -33,8 +34,12 @@ fun NavGraphBuilder.audioPlayerGraph(
             }
         )
     ) { backStackEntry ->
+        val context = LocalContext.current
+        val viewModel: AudioLibraryViewModel = viewModel(
+            factory = AudioLibraryViewModelFactory(context)
+        )
         val audioId = backStackEntry.arguments?.getLong("audioId") ?: -1L
-        val audioList = audioLibraryViewModel.state.value.audioList
+        val audioList = viewModel.state.value.audioList
         println("DEBUG: Received audioId: $audioId")
         val audioToPlay = audioList.find { it.id == audioId}
         println("DEBUG: Found audio: ${audioToPlay?.title}")
