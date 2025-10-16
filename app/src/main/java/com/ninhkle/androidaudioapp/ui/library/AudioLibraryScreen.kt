@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,6 +27,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ninhkle.androidaudioapp.common.data.Audio
+import com.ninhkle.androidaudioapp.ui.player.MiniPlayer
+import com.ninhkle.androidaudioapp.ui.player.PlayerViewModel
 
 
 @Composable
@@ -38,62 +41,85 @@ fun AudioLibraryScreen(
     )
     val state = viewModel.state.value
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Row {
-            Text(
-                text = "Audio Library",
-                style = MaterialTheme.typography.headlineMedium
-            )
-            IconButton(onClick = { viewModel.refresh() }) {
-                Icon(Icons.Default.Refresh, contentDescription = "Refresh")
-            }
-        }
+    val playerViewModel : PlayerViewModel = viewModel()
+    val playerState = playerViewModel.state.value
 
-        Spacer(modifier = Modifier.padding(16.dp))
-
-        when {
-            state.isLoading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-
-            state.error != null -> {
-                Column {
-                    Text("Error loading music")
-                    Text(state.error ?: "Unknown error")
-                    Button(onClick = { viewModel.refresh() }) {
-                        Text("Retry")
-                    }
-                }
-            }
-
-            state.audioList.isEmpty() -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("No audio files found")
-                }
-            }
-
-            else -> {
-                AudioList(
-                    audioList = state.audioList,
-                    onPlayClick = { audio ->
-                        onNavigateToPlayer(audio, state.audioList)
-                    }
+    Box(modifier = Modifier.fillMaxSize())
+    {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Row {
+                Text(
+                    text = "Audio Library",
+                    style = MaterialTheme.typography.headlineMedium
                 )
+                IconButton(onClick = { viewModel.refresh() }) {
+                    Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                }
+            }
+
+            Spacer(modifier = Modifier.padding(16.dp))
+
+            when {
+                state.isLoading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                state.error != null -> {
+                    Column {
+                        Text("Error loading music")
+                        Text(state.error ?: "Unknown error")
+                        Button(onClick = { viewModel.refresh() }) {
+                            Text("Retry")
+                        }
+                    }
+                }
+
+                state.audioList.isEmpty() -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("No audio files found")
+                    }
+                }
+
+                else -> {
+                    AudioList(
+                        audioList = state.audioList,
+                        onPlayClick = { audio ->
+                            onNavigateToPlayer(audio, state.audioList)
+                        }
+                    )
+                }
             }
         }
-
+        // Mini Player
+        val currentAudio = playerState.currentAudio
+        if (currentAudio != null) {
+            MiniPlayer(
+                state = playerState,
+                onPlayPause = playerViewModel::playPause,
+                onNext = playerViewModel::playNext,
+                onExpand = {
+                    onNavigateToPlayer(
+                        currentAudio,
+                        listOf(currentAudio) ?: emptyList()
+                    )
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+            )
+        }
     }
 }
 

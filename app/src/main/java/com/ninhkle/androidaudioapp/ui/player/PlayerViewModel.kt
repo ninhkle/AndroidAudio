@@ -1,14 +1,20 @@
 package com.ninhkle.androidaudioapp.ui.player
 
+import android.app.Application
 import android.content.Context
+import android.content.Intent
+import androidx.annotation.OptIn
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.ninhkle.androidaudioapp.common.data.Audio
+import com.ninhkle.androidaudioapp.common.service.AudioPlaybackService
 import kotlinx.coroutines.launch
 
 data class PlayerState(
@@ -19,8 +25,8 @@ data class PlayerState(
     val isLoading : Boolean = false,
 )
 
-class PlayerViewModel(context: Context) : ViewModel() {
-    private val exoPlayer : ExoPlayer = ExoPlayer.Builder(context).build()
+class PlayerViewModel(application: Application) : AndroidViewModel(application) {
+    private val exoPlayer : ExoPlayer = ExoPlayer.Builder(getApplication()).build()
 
     private val _state = mutableStateOf(PlayerState())
     val state : State<PlayerState> = _state
@@ -73,6 +79,8 @@ class PlayerViewModel(context: Context) : ViewModel() {
     }
 
     fun playAudio(audio: Audio, playlist: List<Audio> = emptyList()) {
+        startPlaybackService()
+
         currentPlaylist = if (playlist.isEmpty()) listOf(audio) else playlist
         currentIndex = currentPlaylist.indexOf(audio)
 
@@ -132,12 +140,22 @@ class PlayerViewModel(context: Context) : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
+        stopPlaybackService()
         exoPlayer.release()
     }
 
-    companion object {
-        fun create(context: Context): PlayerViewModel {
-            return PlayerViewModel(context)
-        }
+    @OptIn(UnstableApi::class)
+    private fun startPlaybackService() {
+        val context = getApplication<Application>().applicationContext
+        val intent = Intent(context, AudioPlaybackService::class.java)
+        context.startService(intent)
     }
+
+    @OptIn(UnstableApi::class)
+    private fun stopPlaybackService() {
+        val context = getApplication<Application>().applicationContext
+        val intent = Intent(context, AudioPlaybackService::class.java)
+        context.stopService(intent)
+    }
+
 }
