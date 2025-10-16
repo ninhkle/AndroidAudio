@@ -18,20 +18,29 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ninhkle.androidaudioapp.common.data.Audio
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlayerScreen(
+    audio: Audio?,
+    playlist: List<Audio> = emptyList(),
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
     val viewModel: PlayerViewModel = remember { PlayerViewModel.create(context) }
+    LaunchedEffect(audio) {
+        audio?.let {
+            viewModel.setAudio(it, playlist)
+        }
+    }
     val state = viewModel.state.value
 
     Scaffold(
@@ -83,5 +92,19 @@ fun PlayerScreen(
 @Preview
 @Composable
 fun PreviewPlayerScreen() {
-    PlayerScreen(onBack = {})
+    val sampleAudio = Audio(
+        id = 1L,
+        title = "Sample Song",
+        artist = "Sample Artist",
+        album = "Sample Album",
+        duration = 240000L,
+        uri = "",
+        albumId = 0L
+    )
+    val samplePlaylist = listOf(sampleAudio)
+    PlayerScreen(
+        audio = sampleAudio,
+        playlist = samplePlaylist,
+        onBack = {}
+    )
 }

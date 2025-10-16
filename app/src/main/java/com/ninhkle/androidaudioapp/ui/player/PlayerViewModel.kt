@@ -117,6 +117,12 @@ class PlayerViewModel(context: Context) : ViewModel() {
         exoPlayer.seekTo(position)
     }
 
+    fun setAudio(audio: Audio?, playlist: List<Audio> = emptyList()) {
+        audio?.let {
+            playAudio(it, playlist)
+        }
+    }
+
     private fun updateProgress() {
         _state.value = _state.value.copy(
             currentPosition = exoPlayer.currentPosition,

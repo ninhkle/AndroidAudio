@@ -30,12 +30,9 @@ import com.ninhkle.androidaudioapp.common.data.Audio
 
 @Composable
 fun AudioLibraryScreen(
+    viewModel: AudioLibraryViewModel,
     onNavigateToPlayer: (Audio, List<Audio>) -> Unit
 ) {
-    val context = LocalContext.current
-    val viewModel : AudioLibraryViewModel = remember {
-        AudioLibraryViewModel.create(context)
-    }
     val state = viewModel.state.value
 
     Column(
@@ -100,7 +97,6 @@ fun AudioLibraryScreen(
 @Composable
 fun AudioList(
     audioList: List<Audio>,
-    onItemClick: (Audio) -> Unit = {},
     onPlayClick: (Audio) -> Unit = {}
 ) {
     LazyColumn {
@@ -110,7 +106,6 @@ fun AudioList(
         ) { audio ->
             AudioListItem(
                 audio = audio,
-                onItemClick = onItemClick,
                 onPlayClick = { onPlayClick(audio) }
             )
             HorizontalDivider()
@@ -121,5 +116,9 @@ fun AudioList(
 @Preview
 @Composable
 fun PreviewAudioLibraryScreen() {
-    AudioLibraryScreen(onNavigateToPlayer = { _, _ -> })
+    val context = LocalContext.current
+    val viewModel: AudioLibraryViewModel = remember {
+        AudioLibraryViewModel.create(context)
+    }
+    AudioLibraryScreen(viewModel, onNavigateToPlayer = { _, _ -> })
 }
