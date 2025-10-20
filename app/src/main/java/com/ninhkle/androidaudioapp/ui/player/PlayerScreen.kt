@@ -11,26 +11,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ninhkle.androidaudioapp.common.data.Audio
 
 @Composable
 fun PlayerScreen(
-    audio: Audio?,
-    playlist: List<Audio> = emptyList(),
+    playerViewModel: PlayerViewModel,
 ) {
-    val viewModel: PlayerViewModel = viewModel()
-    LaunchedEffect(audio) {
-        audio?.let {
-            viewModel.setAudio(it, playlist)
-        }
-    }
-    val state = viewModel.state.value
+    val state = playerViewModel.state.value
 
     Column(
         modifier = Modifier
@@ -52,30 +41,30 @@ fun PlayerScreen(
 
         PlayerControls(
             state = state,
-            onPlayPause = viewModel::playPause,
-            onNext = viewModel::playNext,
-            onPrevious = viewModel::playPrevious,
-            onSeek = viewModel::seekTo,
+            onPlayPause = playerViewModel::playPause,
+            onNext = playerViewModel::playNext,
+            onPrevious = playerViewModel::playPrevious,
+            onSeek = playerViewModel::seekTo,
             modifier = Modifier.fillMaxSize()
         )
     }
 }
 
-@Preview
-@Composable
-fun PreviewPlayerScreen() {
-    val sampleAudio = Audio(
-        id = 1L,
-        title = "Sample Song",
-        artist = "Sample Artist",
-        album = "Sample Album",
-        duration = 240000L,
-        uri = "",
-        albumId = 0L
-    )
-    val samplePlaylist = listOf(sampleAudio)
-    PlayerScreen(
-        audio = sampleAudio,
-        playlist = samplePlaylist,
-    )
-}
+//@Preview
+//@Composable
+//fun PreviewPlayerScreen() {
+//    val sampleAudio = Audio(
+//        id = 1L,
+//        title = "Sample Song",
+//        artist = "Sample Artist",
+//        album = "Sample Album",
+//        duration = 240000L,
+//        uri = "",
+//        albumId = 0L
+//    )
+//    val samplePlaylist = listOf(sampleAudio)
+//    PlayerScreen(
+//        audio = sampleAudio,
+//        playlist = samplePlaylist,
+//    )
+//}
