@@ -48,7 +48,6 @@ fun NavGraphBuilder.audioPlayerGraph(
         PlayerScreen(
             audio = audioToPlay,
             playlist = audioList,
-            onBack = { navController.popBackStack() }
         )
 
     }
