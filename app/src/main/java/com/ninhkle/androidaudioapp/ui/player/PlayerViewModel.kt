@@ -126,8 +126,10 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun setAudio(audio: Audio?, playlist: List<Audio> = emptyList()) {
-        audio?.let {
-            playAudio(it, playlist)
+        audio?.let { newAudio ->
+            val isSameAudio = _state.value.currentAudio?.id == newAudio.id
+            if (isSameAudio) return
+            playAudio(newAudio,playlist)
         }
     }
 

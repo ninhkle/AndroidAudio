@@ -2,10 +2,12 @@ package com.ninhkle.androidaudioapp.ui.library
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,7 +28,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.ninhkle.androidaudioapp.common.data.Audio
+import com.ninhkle.androidaudioapp.common.navigation.Screen
 import com.ninhkle.androidaudioapp.ui.player.MiniPlayer
 import com.ninhkle.androidaudioapp.ui.player.PlayerViewModel
 
@@ -34,6 +38,7 @@ import com.ninhkle.androidaudioapp.ui.player.PlayerViewModel
 @Composable
 fun AudioLibraryScreen(
     playerViewModel: PlayerViewModel,
+    navController: NavHostController,
     onNavigateToPlayer: (Audio, List<Audio>) -> Unit
 ) {
     val context = LocalContext.current
@@ -110,14 +115,12 @@ fun AudioLibraryScreen(
                 onPlayPause = playerViewModel::playPause,
                 onNext = playerViewModel::playNext,
                 onExpand = {
-                    onNavigateToPlayer(
-                        currentAudio,
-                        listOf(currentAudio) ?: emptyList()
-                    )
+                    navController.navigate(Screen.AudioPlayer.route)
                 },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
+                    .height(64.dp)
             )
         }
     }
@@ -128,7 +131,10 @@ fun AudioList(
     audioList: List<Audio>,
     onPlayClick: (Audio) -> Unit = {}
 ) {
-    LazyColumn {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = 64.dp)
+    ) {
         items(
             items = audioList,
             key = { audio -> audio.id }

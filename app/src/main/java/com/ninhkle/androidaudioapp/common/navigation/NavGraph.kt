@@ -5,6 +5,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
@@ -30,6 +31,7 @@ fun NavGraphBuilder.audioPlayerGraph(
         val audioList = libraryViewModel.state.value.audioList
         AudioLibraryScreen(
             playerViewModel = playerViewModel,
+            navController = navController as NavHostController,
             onNavigateToPlayer = { audio, list->
                 playerViewModel.setAudio(audio, audioList)
 
