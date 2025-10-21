@@ -42,13 +42,7 @@ fun NavGraphBuilder.audioPlayerGraph(
     }
 
     composable(
-        route = Screen.AudioPlayer.route,
-        arguments = listOf(
-            navArgument(name = "audioId") {
-                type = NavType.LongType
-                defaultValue = -1L
-            }
-        )
+        route = Screen.AudioPlayer.route
     ) { backStackEntry ->
         val parentEntry = remember(backStackEntry) {
             navController.getBackStackEntry(Screen.AudioLibrary.route)

@@ -5,37 +5,34 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.os.Bundle
-import androidx.core.app.NotificationCompat
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.session.CommandButton
-import androidx.media3.session.MediaNotification
+import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
-import androidx.media3.session.SessionResult
-import com.google.common.collect.ImmutableList
-import com.google.common.util.concurrent.Futures
-import com.google.common.util.concurrent.ListenableFuture
-import com.ninhkle.androidaudioapp.R
 
 @UnstableApi
 class AudioPlaybackService : MediaSessionService() {
     private var mediaSession: MediaSession? = null
 
+    private lateinit var player: ExoPlayer
+
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
 
-        val notificationProvider = createNotificationProvider()
-        setMediaNotificationProvider(notificationProvider)
-
-        val player = ExoPlayer.Builder(this).build()
+        player = ExoPlayer.Builder(this).build()
         mediaSession = MediaSession.Builder(this, player)
             .setCallback(MediaSessionCallback())
             .build()
 
+        val notificationProvider = DefaultMediaNotificationProvider.Builder(this)
+            .setChannelId(NOTIFICATION_CHANNEL_ID)
+            .build()
+        setMediaNotificationProvider(notificationProvider)
     }
+
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
         return mediaSession
@@ -74,38 +71,28 @@ class AudioPlaybackService : MediaSessionService() {
         }
     }
 
-    private fun createNotificationProvider(): MediaNotification.Provider {
-        return object : MediaNotification.Provider {
-            override fun createNotification(
-                mediaSession: MediaSession,
-                customLayout: ImmutableList<CommandButton>,
-                actionFactory: MediaNotification.ActionFactory,
-                onNotificationPostedCallback: MediaNotification.Provider.Callback
-            ): MediaNotification {
-                // This is where you build the notification that the service will manage.
-                val notification = NotificationCompat.Builder(this@AudioPlaybackService, NOTIFICATION_CHANNEL_ID)
-                    .setContentTitle("Now Playing") // This will be updated by the media session
-                    .setContentText("...")       // This will also be updated
-                    .setSmallIcon(R.drawable.ic_default_music_art)
-                    .build()
 
-                return MediaNotification(NOTIFICATION_ID, notification)
-            }
-
-            override fun handleCustomCommand(
-                session: MediaSession,
-                action: String,
-                extras: Bundle
-            ): Boolean {
-                // Handle custom commands if you have any
-                return false
-            }
-        }
-    }
-
-
-    inner class MediaSessionCallback : MediaSession.Callback {
+    private inner class MediaSessionCallback : MediaSession.Callback {
         // Implement media session callback methods as needed
+        override fun onConnect(
+            session: MediaSession,
+            controller: MediaSession.ControllerInfo
+        ): MediaSession.ConnectionResult {
+            val connectionResult = super.onConnect(session, controller)
+            val availablePlayerCommands = connectionResult.availablePlayerCommands.buildUpon()
+
+            availablePlayerCommands
+                .add(Player.COMMAND_PLAY_PAUSE)
+                .add(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
+                .add(Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
+                .add(Player.COMMAND_SET_SHUFFLE_MODE)
+                .add(Player.COMMAND_SET_REPEAT_MODE)
+            val customCommands = availablePlayerCommands.build()
+            return MediaSession.ConnectionResult.accept(
+                connectionResult.availableSessionCommands,
+                customCommands
+            )
+        }
     }
 
     companion object {
