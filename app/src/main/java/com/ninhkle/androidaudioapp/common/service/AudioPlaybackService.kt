@@ -2,8 +2,10 @@ package com.ninhkle.androidaudioapp.common.service
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -11,6 +13,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import com.ninhkle.androidaudioapp.MainActivity
 
 @UnstableApi
 class AudioPlaybackService : MediaSessionService() {
@@ -23,8 +26,20 @@ class AudioPlaybackService : MediaSessionService() {
         createNotificationChannel()
 
         player = ExoPlayer.Builder(this).build()
+        val deepLinkUri = Uri.parse("android-app://com.ninhkle.androidaudioapp/player")
+
+        val activityIntent = Intent(Intent.ACTION_VIEW, deepLinkUri, this, MainActivity::class.java)
+
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            activityIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
         mediaSession = MediaSession.Builder(this, player)
             .setCallback(MediaSessionCallback())
+            .setSessionActivity(pendingIntent)
             .build()
 
         val notificationProvider = DefaultMediaNotificationProvider.Builder(this)

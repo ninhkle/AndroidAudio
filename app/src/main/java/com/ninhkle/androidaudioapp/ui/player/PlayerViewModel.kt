@@ -3,6 +3,7 @@ package com.ninhkle.androidaudioapp.ui.player
 import android.app.Application
 import android.content.ComponentName
 import android.content.Intent
+import android.net.Uri
 import androidx.annotation.OptIn
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -18,6 +19,8 @@ import com.google.common.util.concurrent.MoreExecutors
 import com.ninhkle.androidaudioapp.common.data.Audio
 import com.ninhkle.androidaudioapp.common.service.AudioPlaybackService
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 data class PlayerState(
@@ -35,7 +38,9 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     private var currentPlaylist: List<Audio> = emptyList()
     private var currentIndex: Int = 0
 
-    private var mediaController: MediaController? = null
+    private val _mediaControllerFLow = MutableStateFlow<MediaController?>(null)
+    val mediaControllerFlow = _mediaControllerFLow.asStateFlow()
+
 
     init {
         connectToService()
@@ -49,14 +54,16 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
 
         controllerFuture.addListener(
             {
-                mediaController = controllerFuture.get()
-                setupControllerListeners()
+                val mediaController = controllerFuture.get()
+                setupControllerListeners(mediaController)
+
+                _mediaControllerFLow.value = mediaController
             },
             MoreExecutors.directExecutor()
         )
     }
 
-    private fun setupControllerListeners() {
+    private fun setupControllerListeners(mediaController: MediaController) {
         mediaController?.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 _state.value = _state.value.copy(
@@ -74,9 +81,19 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
 
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 super.onMediaItemTransition(mediaItem, reason)
-                if (mediaItem == null) return
-                val audioId = mediaItem.mediaId.toLongOrNull()
-                val newCurrentAudio = currentPlaylist.find { it.id == audioId }
+                if (mediaItem == null) {
+                    _state.value = _state.value.copy(currentAudio = null)
+                    return
+                }
+                val newCurrentAudio = Audio(
+                    id = mediaItem.mediaId.toLongOrNull() ?: -1L,
+                    uri = (mediaItem.requestMetadata.mediaUri ?: Uri.EMPTY).toString(),
+                    title = mediaItem.mediaMetadata.title?.toString() ?: "Unknown Title",
+                    artist = mediaItem.mediaMetadata.artist?.toString() ?: "Unknown Artist",
+                    album = mediaItem.mediaMetadata.albumTitle?.toString() ?: "Unknown Album",
+                    duration = mediaController.duration, // Get duration from the controller
+                    albumId = 0L
+                )
                 _state.value = _state.value.copy(currentAudio = newCurrentAudio)
             }
         })
@@ -93,6 +110,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun setAudio(audio: Audio?, playlist: List<Audio> = emptyList()) {
+        val mediaController = _mediaControllerFLow.value
         audio?.let { newAudio ->
             val isSameAudio = mediaController?.currentMediaItem?.mediaId == newAudio.id.toString()
             if (isSameAudio) return
@@ -121,6 +139,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun playPause() {
+        val mediaController = _mediaControllerFLow.value
         if (mediaController?.isPlaying == true) {
             mediaController?.pause()
         } else {
@@ -129,21 +148,63 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun playNext() {
+        val mediaController = _mediaControllerFLow.value
         mediaController?.seekToNextMediaItem()
     }
 
     fun playPrevious() {
+        val mediaController = _mediaControllerFLow.value
         mediaController?.seekToPreviousMediaItem()
     }
 
     fun seekTo(position: Long) {
+        val mediaController = _mediaControllerFLow.value
         mediaController?.seekTo(position)
     }
 
+//    fun synchronizeState() {
+//        val mediaController = _mediaControllerFLow.value
+//        if (mediaController == null) {
+//            isSyncRequested = true
+//            return
+//        }
+//        mediaController?.let { controller ->
+//            if (controller.mediaItemCount > 0) {
+//                val currentMediaItem = controller.currentMediaItem ?: return
+//                val currentAudioFromService = Audio(
+//                    id = currentMediaItem.mediaId.toLongOrNull() ?: -1L,
+//                    uri = (currentMediaItem.requestMetadata.mediaUri ?: Uri.EMPTY).toString(),
+//                    title = currentMediaItem.mediaMetadata.title?.toString() ?: "Unknown Title",
+//                    artist = currentMediaItem.mediaMetadata.artist?.toString() ?: "Unknown Artist",
+//                    album = currentMediaItem.mediaMetadata.albumTitle?.toString() ?: "Unknown Album",
+//                    duration = controller.duration,
+//                    albumId = 0L // Placeholder, as albumId is not available from MediaItem
+//                )
+//                _state.value = _state.value.copy(
+//                    currentAudio = currentAudioFromService,
+//                    isPlaying = controller.isPlaying,
+//                    currentPosition = controller.currentPosition,
+//                    totalDuration = controller.duration,
+//                    isLoading = controller.playbackState == Player.STATE_BUFFERING
+//                )
+//            }
+//        }
+//    }
 
     override fun onCleared() {
         super.onCleared()
+        val mediaController = _mediaControllerFLow.value
         mediaController?.release()
+    }
+
+    fun updateStateFromController(audio: Audio, controller: Player) {
+        _state.value = _state.value.copy(
+            currentAudio = audio,
+            isPlaying = controller.isPlaying,
+            currentPosition = controller.currentPosition,
+            totalDuration = controller.duration,
+            isLoading = controller.playbackState == Player.STATE_BUFFERING
+        )
     }
 
 

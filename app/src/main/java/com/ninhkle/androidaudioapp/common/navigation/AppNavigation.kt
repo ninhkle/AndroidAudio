@@ -9,10 +9,12 @@ import androidx.navigation.compose.rememberNavController
 import com.ninhkle.androidaudioapp.common.data.Audio
 import com.ninhkle.androidaudioapp.ui.library.AudioLibraryScreen
 import com.ninhkle.androidaudioapp.ui.library.AudioLibraryViewModel
+import com.ninhkle.androidaudioapp.ui.player.PlayerViewModel
 
 @Composable
 fun AppNavigation(
-    navController: NavHostController
+    navController: NavHostController,
+    playerViewModel: PlayerViewModel
 ) {
 
     NavHost(
@@ -21,6 +23,7 @@ fun AppNavigation(
     ) {
         audioPlayerGraph(
             navController = navController,
+            playerViewModel = playerViewModel
         )
     }
 }

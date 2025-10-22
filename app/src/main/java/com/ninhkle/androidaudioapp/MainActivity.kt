@@ -9,10 +9,12 @@ import androidx.compose.runtime.getValue
 import com.ninhkle.androidaudioapp.common.util.checkAndRequestPermissions
 import com.ninhkle.androidaudioapp.common.util.handlePermissionResult
 import com.ninhkle.androidaudioapp.ui.permission.PermissionsViewModel
+import com.ninhkle.androidaudioapp.ui.player.PlayerViewModel
 
 
 class MainActivity : ComponentActivity() {
     private val permissionsViewModel: PermissionsViewModel by viewModels()
+    private val playerViewModel: PlayerViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,6 +22,7 @@ class MainActivity : ComponentActivity() {
             val permissionState by permissionsViewModel.permissionState.collectAsState()
             AudioPlayerApp(
                 permissionState = permissionState,
+                playerViewModel = playerViewModel,
                 onRequestPermissions = {
                     checkAndRequestPermissions(this) {
                         permissionsViewModel.onPermissionsGranted()

@@ -24,11 +24,13 @@ import com.ninhkle.androidaudioapp.ui.common.MusicTopAppBar
 import com.ninhkle.androidaudioapp.ui.permission.PermissionScreen
 import com.ninhkle.androidaudioapp.ui.permission.PermissionState
 import com.ninhkle.androidaudioapp.ui.permission.PermissionUIState
+import com.ninhkle.androidaudioapp.ui.player.PlayerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AudioPlayerApp(
     permissionState: PermissionState = PermissionState.Loading,
+    playerViewModel: PlayerViewModel,
     onRequestPermissions: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -65,7 +67,10 @@ fun AudioPlayerApp(
 
                     is PermissionState.Granted -> {
                         // Permission granted, show main app
-                        AppNavigation(navController = navController)
+                        AppNavigation(
+                            navController = navController,
+                            playerViewModel = playerViewModel
+                        )
                     }
 
                     is PermissionState.Denied -> {
