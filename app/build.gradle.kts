@@ -6,12 +6,24 @@ plugins {
 
 android {
     namespace = "com.ninhkle.androidaudioapp"
-    compileSdk = 35
+    compileSdk = 36
+
+    sourceSets {
+        getByName("main") {
+            java.srcDirs("src/main/java")
+        }
+        getByName("test") {
+            java.srcDirs("src/test/java")
+        }
+        getByName("androidTest") {
+            java.srcDirs("src/androidTest/java")
+        }
+    }
 
     defaultConfig {
         applicationId = "com.ninhkle.androidaudioapp"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -37,6 +49,7 @@ android {
     buildFeatures {
         compose = true
     }
+
 }
 
 dependencies {
@@ -64,6 +77,11 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.navigation.runtime.android)
     testImplementation(libs.junit)
+    testImplementation(libs.androidx.core.testing)
+    testImplementation(libs.jetbrains.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
+    testImplementation(libs.robolectric)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

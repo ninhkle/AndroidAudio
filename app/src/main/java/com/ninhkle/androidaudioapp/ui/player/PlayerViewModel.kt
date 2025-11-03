@@ -2,11 +2,8 @@ package com.ninhkle.androidaudioapp.ui.player
 
 import android.app.Application
 import android.content.ComponentName
-import android.content.Intent
 import android.net.Uri
 import androidx.annotation.OptIn
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
@@ -32,8 +29,8 @@ data class PlayerState(
 )
 
 class PlayerViewModel(application: Application) : AndroidViewModel(application) {
-    private val _state = mutableStateOf(PlayerState())
-    val state : State<PlayerState> = _state
+    private val _state = MutableStateFlow(PlayerState())
+    val state  = _state.asStateFlow()
 
     private var currentPlaylist: List<Audio> = emptyList()
     private var currentIndex: Int = 0
@@ -55,6 +52,8 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         controllerFuture.addListener(
             {
                 val mediaController = controllerFuture.get()
+                synchronizeStateWithController(mediaController)
+
                 setupControllerListeners(mediaController)
 
                 _mediaControllerFLow.value = mediaController
@@ -63,12 +62,12 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         )
     }
 
-    private fun setupControllerListeners(mediaController: MediaController) {
-        mediaController?.addListener(object : Player.Listener {
+    fun setupControllerListeners(mediaController: MediaController) {
+        mediaController.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 _state.value = _state.value.copy(
                     isLoading = playbackState == Player.STATE_BUFFERING,
-                    totalDuration = mediaController?.duration ?: 0L
+                    totalDuration = mediaController.duration
                 )
                 if (playbackState == Player.STATE_ENDED) {
                     // Auto play next audio
@@ -99,9 +98,9 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         })
         viewModelScope.launch {
             while (true) {
-                if (mediaController?.isPlaying == true) {
+                if (mediaController.isPlaying) {
                     _state.value = _state.value.copy(
-                        currentPosition = mediaController?.currentPosition ?: 0L
+                        currentPosition = mediaController.currentPosition
                     )
                 }
                 delay(1000)
@@ -141,7 +140,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     fun playPause() {
         val mediaController = _mediaControllerFLow.value
         if (mediaController?.isPlaying == true) {
-            mediaController?.pause()
+            mediaController.pause()
         } else {
             mediaController?.play()
         }
@@ -162,34 +161,30 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         mediaController?.seekTo(position)
     }
 
-//    fun synchronizeState() {
-//        val mediaController = _mediaControllerFLow.value
-//        if (mediaController == null) {
-//            isSyncRequested = true
-//            return
-//        }
-//        mediaController?.let { controller ->
-//            if (controller.mediaItemCount > 0) {
-//                val currentMediaItem = controller.currentMediaItem ?: return
-//                val currentAudioFromService = Audio(
-//                    id = currentMediaItem.mediaId.toLongOrNull() ?: -1L,
-//                    uri = (currentMediaItem.requestMetadata.mediaUri ?: Uri.EMPTY).toString(),
-//                    title = currentMediaItem.mediaMetadata.title?.toString() ?: "Unknown Title",
-//                    artist = currentMediaItem.mediaMetadata.artist?.toString() ?: "Unknown Artist",
-//                    album = currentMediaItem.mediaMetadata.albumTitle?.toString() ?: "Unknown Album",
-//                    duration = controller.duration,
-//                    albumId = 0L // Placeholder, as albumId is not available from MediaItem
-//                )
-//                _state.value = _state.value.copy(
-//                    currentAudio = currentAudioFromService,
-//                    isPlaying = controller.isPlaying,
-//                    currentPosition = controller.currentPosition,
-//                    totalDuration = controller.duration,
-//                    isLoading = controller.playbackState == Player.STATE_BUFFERING
-//                )
-//            }
-//        }
-//    }
+    private fun synchronizeStateWithController(controller: MediaController) {
+        // If there's no media item, there's nothing to sync.
+        val currentMediaItem = controller.currentMediaItem ?: return
+
+        // Reconstruct the Audio object from the MediaItem
+        val currentAudio = Audio(
+            id = currentMediaItem.mediaId.toLongOrNull() ?: -1L,
+            uri = (currentMediaItem.requestMetadata.mediaUri ?: Uri.EMPTY).toString(),
+            title = currentMediaItem.mediaMetadata.title?.toString() ?: "Unknown Title",
+            artist = currentMediaItem.mediaMetadata.artist?.toString() ?: "Unknown Artist",
+            album = currentMediaItem.mediaMetadata.albumTitle?.toString() ?: "Unknown Album",
+            duration = controller.duration.coerceAtLeast(0), // Ensure duration isn't negative
+            albumId = 0L // This is a placeholder, as expected
+        )
+
+        // Update the state with all the current details from the controller
+        _state.value = _state.value.copy(
+            currentAudio = currentAudio,
+            isPlaying = controller.isPlaying,
+            currentPosition = controller.currentPosition,
+            totalDuration = controller.duration.coerceAtLeast(0),
+            isLoading = controller.playbackState == Player.STATE_BUFFERING
+        )
+    }
 
     override fun onCleared() {
         super.onCleared()

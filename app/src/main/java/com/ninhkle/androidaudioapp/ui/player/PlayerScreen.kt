@@ -18,29 +18,14 @@ import androidx.compose.ui.unit.dp
 import com.ninhkle.androidaudioapp.common.data.Audio
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun PlayerScreen(
     playerViewModel: PlayerViewModel,
 ) {
-    LaunchedEffect(playerViewModel) {
-        val mediaController = playerViewModel.mediaControllerFlow.filterNotNull().first()
-        if (mediaController.mediaItemCount > 0) {
-            val currentMediaItem = mediaController.currentMediaItem ?: return@LaunchedEffect
-            val currentAudioFromService = Audio(
-                id = currentMediaItem.mediaId.toLong(),
-                title = currentMediaItem.mediaMetadata.title?.toString() ?: "Unknown Title",
-                artist = currentMediaItem.mediaMetadata.artist?.toString() ?: "Unknown Artist",
-                album = currentMediaItem.mediaMetadata.albumTitle?.toString() ?: "Unknown Album",
-                duration = mediaController.duration,
-                uri = currentMediaItem.localConfiguration?.uri.toString(),
-                albumId = 0L // Placeholder, as albumId is not available from MediaItem
-            )
-            playerViewModel.updateStateFromController(currentAudioFromService, mediaController)
-        }
-    }
 
-    val state = playerViewModel.state.value
+    val state = playerViewModel.state.collectAsState().value
 
     Column(
         modifier = Modifier
