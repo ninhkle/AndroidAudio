@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.net.Uri
 import androidx.annotation.OptIn
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -28,41 +29,46 @@ data class PlayerState(
     val isLoading : Boolean = false,
 )
 
-class PlayerViewModel(application: Application) : AndroidViewModel(application) {
+class PlayerViewModel() : ViewModel() {
     private val _state = MutableStateFlow(PlayerState())
     val state  = _state.asStateFlow()
 
     private var currentPlaylist: List<Audio> = emptyList()
     private var currentIndex: Int = 0
 
-    private val _mediaControllerFLow = MutableStateFlow<MediaController?>(null)
-    val mediaControllerFlow = _mediaControllerFLow.asStateFlow()
+    private var mediaController: MediaController? = null
 
+    fun setMediaController(controller: MediaController) {
+        if (this.mediaController != null) return
 
-    init {
-        connectToService()
+        this.mediaController = controller
+        synchronizeStateWithController(controller)
+        setupControllerListeners(controller)
     }
 
-    @OptIn(UnstableApi::class)
-    private fun connectToService() {
-        val context = getApplication<Application>().applicationContext
-        val sessionToken = SessionToken(context, ComponentName(context, AudioPlaybackService::class.java))
-        val controllerFuture = MediaController.Builder(context, sessionToken).buildAsync()
+//    @OptIn(UnstableApi::class)
+//    private fun connectToService() {
+//        val context = getApplication<Application>().applicationContext
+//        val sessionToken = SessionToken(context, ComponentName(context, AudioPlaybackService::class.java))
+//        val controllerFuture = MediaController.Builder(context, sessionToken).buildAsync()
+//
+//        controllerFuture.addListener(
+//            {
+//                val mediaController = controllerFuture.get()
+//                synchronizeStateWithController(mediaController)
+//
+//                setupControllerListeners(mediaController)
+//
+//                _mediaControllerFLow.value = mediaController
+//            },
+//            MoreExecutors.directExecutor()
+//        )
+//    }
 
-        controllerFuture.addListener(
-            {
-                val mediaController = controllerFuture.get()
-                synchronizeStateWithController(mediaController)
-
-                setupControllerListeners(mediaController)
-
-                _mediaControllerFLow.value = mediaController
-            },
-            MoreExecutors.directExecutor()
-        )
-    }
-
-    fun setupControllerListeners(mediaController: MediaController) {
+    private fun setupControllerListeners(
+        mediaController: MediaController,
+        enablePositionUpdates: Boolean = true
+    ) {
         mediaController.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 _state.value = _state.value.copy(
@@ -96,20 +102,32 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
                 _state.value = _state.value.copy(currentAudio = newCurrentAudio)
             }
         })
-        viewModelScope.launch {
-            while (true) {
-                if (mediaController.isPlaying) {
-                    _state.value = _state.value.copy(
-                        currentPosition = mediaController.currentPosition
-                    )
+        if (enablePositionUpdates) {
+            viewModelScope.launch {
+                while (true) {
+                    if (mediaController.isPlaying) {
+                        _state.value = _state.value.copy(
+                            currentPosition = mediaController.currentPosition
+                        )
+                    }
+                    delay(1000)
                 }
-                delay(1000)
             }
         }
     }
 
+    fun setMediaController(
+        controller: MediaController,
+        enablePositionUpdatesInTest: Boolean = true
+    ) {
+        if (this.mediaController != null) return
+
+        this.mediaController = controller
+        synchronizeStateWithController(controller)
+        setupControllerListeners(controller, enablePositionUpdatesInTest) // <-- PASS IT HERE
+    }
+
     fun setAudio(audio: Audio?, playlist: List<Audio> = emptyList()) {
-        val mediaController = _mediaControllerFLow.value
         audio?.let { newAudio ->
             val isSameAudio = mediaController?.currentMediaItem?.mediaId == newAudio.id.toString()
             if (isSameAudio) return
@@ -138,26 +156,22 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun playPause() {
-        val mediaController = _mediaControllerFLow.value
         if (mediaController?.isPlaying == true) {
-            mediaController.pause()
+            mediaController?.pause()
         } else {
             mediaController?.play()
         }
     }
 
     fun playNext() {
-        val mediaController = _mediaControllerFLow.value
         mediaController?.seekToNextMediaItem()
     }
 
     fun playPrevious() {
-        val mediaController = _mediaControllerFLow.value
         mediaController?.seekToPreviousMediaItem()
     }
 
     fun seekTo(position: Long) {
-        val mediaController = _mediaControllerFLow.value
         mediaController?.seekTo(position)
     }
 
@@ -188,8 +202,8 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
 
     override fun onCleared() {
         super.onCleared()
-        val mediaController = _mediaControllerFLow.value
-        mediaController?.release()
+//        val mediaController = _mediaControllerFLow.value
+//        mediaController?.release()
     }
 
     fun updateStateFromController(audio: Audio, controller: Player) {
