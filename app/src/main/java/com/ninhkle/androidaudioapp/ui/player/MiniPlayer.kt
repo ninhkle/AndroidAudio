@@ -32,6 +32,8 @@ fun MiniPlayer(
 ) {
     Surface(
         tonalElevation = 4.dp,
+        shadowElevation = 4.dp,
+        shape = MaterialTheme.shapes.medium,
         modifier = modifier
     ) {
         Row(

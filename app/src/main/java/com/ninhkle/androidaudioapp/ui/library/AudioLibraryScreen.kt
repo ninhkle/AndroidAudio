@@ -1,5 +1,7 @@
 package com.ninhkle.androidaudioapp.ui.library
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,16 +23,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.ninhkle.androidaudioapp.common.data.Audio
 import com.ninhkle.androidaudioapp.common.navigation.Screen
+import com.ninhkle.androidaudioapp.ui.common.AudioItemShimmer
 import com.ninhkle.androidaudioapp.ui.player.MiniPlayer
 import com.ninhkle.androidaudioapp.ui.player.PlayerViewModel
 
@@ -47,19 +49,27 @@ fun AudioLibraryScreen(
     )
     val state = viewModel.state.value
 
-    val playerState = playerViewModel.state.value
+    val playerState = playerViewModel.state.collectAsState().value
 
-    Box(modifier = Modifier.fillMaxSize())
+    Box(
+        modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.background)
+    )
     {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            Row {
+            Row (
+                modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
                 Text(
                     text = "Audio Library",
-                    style = MaterialTheme.typography.headlineMedium
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(4.dp),
                 )
                 IconButton(onClick = { viewModel.refresh() }) {
                     Icon(Icons.Default.Refresh, contentDescription = "Refresh")
@@ -70,18 +80,18 @@ fun AudioLibraryScreen(
 
             when {
                 state.isLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
+                    LazyColumn {
+                        items(10) {
+                            AudioItemShimmer()
+                            HorizontalDivider()
+                        }
                     }
                 }
 
                 state.error != null -> {
                     Column {
                         Text("Error loading music")
-                        Text(state.error ?: "Unknown error")
+                        Text(state.error)
                         Button(onClick = { viewModel.refresh() }) {
                             Text("Retry")
                         }

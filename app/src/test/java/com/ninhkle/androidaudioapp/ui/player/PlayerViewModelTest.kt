@@ -54,7 +54,7 @@ class PlayerViewModelTest {
         every { mockMediaController.duration } returns 300000L
 
         // ACT
-        viewModel.setMediaController(mockMediaController, enablePositionUpdatesInTest = false)
+        viewModel.setMediaController(mockMediaController, enablePositionUpdates = false)
 
         // ASSERT
         val currentState = viewModel.state.value
@@ -76,7 +76,7 @@ class PlayerViewModelTest {
         every { mockMediaController.addListener(capture(playerListenerSlot)) } answers {}
 
         // ACT
-        viewModel.setMediaController(mockMediaController, enablePositionUpdatesInTest = false)
+        viewModel.setMediaController(mockMediaController, enablePositionUpdates = false)
 
         // ASSERT
         viewModel.state.test {
@@ -105,7 +105,7 @@ class PlayerViewModelTest {
         every { mockMediaController.currentMediaItem } returns mediaItemForThisTest
 
         // ACT
-        viewModel.setMediaController(mockMediaController, enablePositionUpdatesInTest = false)
+        viewModel.setMediaController(mockMediaController, enablePositionUpdates = false)
 
         // ASSERT
         every { mockMediaController.isPlaying } returns true
@@ -115,5 +115,42 @@ class PlayerViewModelTest {
         every { mockMediaController.isPlaying } returns false
         viewModel.playPause()
         verify { mockMediaController.play() }
+    }
+
+    @Test
+    fun `playNext delegates correctly to mediaController`() = runTest {
+        // ARRANGE
+        viewModel.setMediaController(mockMediaController)
+
+        // ACT
+        viewModel.playNext()
+
+        // ASSERT
+        verify { mockMediaController.seekToNextMediaItem() }
+    }
+
+    @Test
+    fun `playPrevious delegates correctly to mediaController`() = runTest {
+        // ARRANGE
+        viewModel.setMediaController(mockMediaController)
+
+        // ACT
+        viewModel.playPrevious()
+
+        // ASSERT
+        verify { mockMediaController.seekToPreviousMediaItem() }
+    }
+
+    @Test
+    fun `seekTo delegates correctly to mediaController`() = runTest {
+        // ARRANGE
+        viewModel.setMediaController(mockMediaController)
+        val targetPosition = 12345L
+
+        // ACT
+        viewModel.seekTo(targetPosition)
+
+        // ASSERT
+        verify { mockMediaController.seekTo(targetPosition) }
     }
 }

@@ -1,5 +1,6 @@
 package com.ninhkle.androidaudioapp.ui.player
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,6 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +23,8 @@ import com.ninhkle.androidaudioapp.common.data.Audio
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 
 @Composable
 fun PlayerScreen(
@@ -36,11 +42,26 @@ fun PlayerScreen(
     ) {
         // Album art placeholder
         Box(
-            modifier = Modifier.size(300.dp).padding(32.dp),
+            modifier = Modifier
+                .size(300.dp)
+                .clip(MaterialTheme.shapes.extraLarge)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primaryContainer,
+                            MaterialTheme.colorScheme.secondaryContainer
+                        )
+                    )
+                )
+                .padding(32.dp),
             contentAlignment = Alignment.Center
         ) {
-            // Add actual album art later
-            Text(text = "Album Art", style = MaterialTheme.typography.bodyLarge)
+            Icon(
+                imageVector = Icons.Default.MusicNote,
+                contentDescription = "Album Art",
+                modifier = Modifier.size(64.dp),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         }
 
         Spacer(modifier = Modifier.height(32.dp))

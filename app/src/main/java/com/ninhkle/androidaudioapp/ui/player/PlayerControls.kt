@@ -1,6 +1,7 @@
 package com.ninhkle.androidaudioapp.ui.player
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -76,6 +78,11 @@ fun PlayerControls(
                         onSeek(newValue.toLong())
                     },
                     valueRange = 0f..state.totalDuration.toFloat().coerceAtLeast(1f),
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.colorScheme.primary,
+                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                        inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                    ),
                     modifier = Modifier.weight(1f)
                 )
 
@@ -105,7 +112,7 @@ fun PlayerControls(
 
                 IconButton(
                     onClick = onPlayPause,
-                    modifier = Modifier.size(64.dp)
+                    modifier = Modifier.size(64.dp).animateContentSize()
                 ) {
                     Icon(
                         imageVector = if (state.isPlaying) {

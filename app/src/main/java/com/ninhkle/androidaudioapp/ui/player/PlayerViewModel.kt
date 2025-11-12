@@ -1,25 +1,19 @@
 package com.ninhkle.androidaudioapp.ui.player
 
-import android.app.Application
-import android.content.ComponentName
 import android.net.Uri
-import androidx.annotation.OptIn
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
-import androidx.media3.session.SessionToken
-import com.google.common.util.concurrent.MoreExecutors
 import com.ninhkle.androidaudioapp.common.data.Audio
-import com.ninhkle.androidaudioapp.common.service.AudioPlaybackService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+
+private const val POSITION_UPDATE_INTERVAL_MS = 1000L
 
 data class PlayerState(
     val currentAudio: Audio? = null,
@@ -29,41 +23,21 @@ data class PlayerState(
     val isLoading : Boolean = false,
 )
 
-class PlayerViewModel() : ViewModel() {
+class PlayerViewModel : ViewModel() {
     private val _state = MutableStateFlow(PlayerState())
     val state  = _state.asStateFlow()
 
     private var currentPlaylist: List<Audio> = emptyList()
-    private var currentIndex: Int = 0
 
     private var mediaController: MediaController? = null
 
-    fun setMediaController(controller: MediaController) {
+    fun setMediaController(controller: MediaController, enablePositionUpdates: Boolean = true) {
         if (this.mediaController != null) return
 
         this.mediaController = controller
         synchronizeStateWithController(controller)
-        setupControllerListeners(controller)
+        setupControllerListeners(controller, enablePositionUpdates)
     }
-
-//    @OptIn(UnstableApi::class)
-//    private fun connectToService() {
-//        val context = getApplication<Application>().applicationContext
-//        val sessionToken = SessionToken(context, ComponentName(context, AudioPlaybackService::class.java))
-//        val controllerFuture = MediaController.Builder(context, sessionToken).buildAsync()
-//
-//        controllerFuture.addListener(
-//            {
-//                val mediaController = controllerFuture.get()
-//                synchronizeStateWithController(mediaController)
-//
-//                setupControllerListeners(mediaController)
-//
-//                _mediaControllerFLow.value = mediaController
-//            },
-//            MoreExecutors.directExecutor()
-//        )
-//    }
 
     private fun setupControllerListeners(
         mediaController: MediaController,
@@ -75,9 +49,6 @@ class PlayerViewModel() : ViewModel() {
                     isLoading = playbackState == Player.STATE_BUFFERING,
                     totalDuration = mediaController.duration
                 )
-                if (playbackState == Player.STATE_ENDED) {
-                    // Auto play next audio
-                }
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -110,21 +81,10 @@ class PlayerViewModel() : ViewModel() {
                             currentPosition = mediaController.currentPosition
                         )
                     }
-                    delay(1000)
+                    delay(POSITION_UPDATE_INTERVAL_MS)
                 }
             }
         }
-    }
-
-    fun setMediaController(
-        controller: MediaController,
-        enablePositionUpdatesInTest: Boolean = true
-    ) {
-        if (this.mediaController != null) return
-
-        this.mediaController = controller
-        synchronizeStateWithController(controller)
-        setupControllerListeners(controller, enablePositionUpdatesInTest) // <-- PASS IT HERE
     }
 
     fun setAudio(audio: Audio?, playlist: List<Audio> = emptyList()) {
@@ -202,8 +162,7 @@ class PlayerViewModel() : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-//        val mediaController = _mediaControllerFLow.value
-//        mediaController?.release()
+        mediaController?.release()
     }
 
     fun updateStateFromController(audio: Audio, controller: Player) {
@@ -215,6 +174,4 @@ class PlayerViewModel() : ViewModel() {
             isLoading = controller.playbackState == Player.STATE_BUFFERING
         )
     }
-
-
 }
