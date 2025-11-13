@@ -38,21 +38,22 @@ fun PlayerControls(
     modifier: Modifier = Modifier
 ) {
     Column (
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         state.currentAudio?.let { audio ->
             Text(
                 text = audio.title,
                 style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
             Text(
                 text = audio.artist,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(horizontal = 16.dp)
@@ -69,6 +70,7 @@ fun PlayerControls(
                 Text(
                     text = formatTime(state.currentPosition),
                     style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondary,
                     modifier = Modifier.width(50.dp)
                 )
 
@@ -79,8 +81,8 @@ fun PlayerControls(
                     },
                     valueRange = 0f..state.totalDuration.toFloat().coerceAtLeast(1f),
                     colors = SliderDefaults.colors(
-                        thumbColor = MaterialTheme.colorScheme.primary,
-                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                        thumbColor = MaterialTheme.colorScheme.secondary,
+                        activeTrackColor = MaterialTheme.colorScheme.secondary,
                         inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
                     modifier = Modifier.weight(1f)
@@ -89,6 +91,7 @@ fun PlayerControls(
                 Text(
                     text = formatTime(state.totalDuration),
                     style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondary,
                     modifier = Modifier.width(50.dp)
                 )
             }

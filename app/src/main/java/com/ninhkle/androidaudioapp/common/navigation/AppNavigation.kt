@@ -22,21 +22,7 @@ fun AppNavigation(
 ) {
     val context = LocalContext.current
     LaunchedEffect(Unit) {
-        val sessionToken = SessionToken(context,
-            ComponentName(context, AudioPlaybackService::class.java)
-        )
-        val controllerFuture =
-            MediaController.Builder(context, sessionToken).buildAsync()
-
-        controllerFuture.addListener(
-            {
-                // When the controller is ready...
-                val mediaController = controllerFuture.get()
-                // ...give it to the ViewModel.
-                playerViewModel.setMediaController(mediaController)
-            },
-            MoreExecutors.directExecutor()
-        )
+        playerViewModel.initializeController(context)
     }
 
     NavHost(

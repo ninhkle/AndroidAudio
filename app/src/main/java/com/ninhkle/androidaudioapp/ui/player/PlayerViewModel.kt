@@ -1,13 +1,20 @@
 package com.ninhkle.androidaudioapp.ui.player
 
+import android.content.ComponentName
+import android.content.Context
 import android.net.Uri
+import androidx.annotation.OptIn
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
+import com.google.common.util.concurrent.MoreExecutors
 import com.ninhkle.androidaudioapp.common.data.Audio
+import com.ninhkle.androidaudioapp.common.service.AudioPlaybackService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,6 +37,23 @@ class PlayerViewModel : ViewModel() {
     private var currentPlaylist: List<Audio> = emptyList()
 
     private var mediaController: MediaController? = null
+    private var isInitialized = false
+
+    @OptIn(UnstableApi::class)
+    fun initializeController(context: Context) {
+        if (isInitialized) return
+        val appContext = context.applicationContext
+        val sessionToken = SessionToken(
+            appContext,
+            ComponentName(appContext, AudioPlaybackService::class.java))
+        val controllerFuture = MediaController.Builder(appContext, sessionToken).buildAsync()
+
+        controllerFuture.addListener({
+            val mediaController = controllerFuture.get()
+            setMediaController(mediaController)
+        }, MoreExecutors.directExecutor())
+        isInitialized = true
+    }
 
     fun setMediaController(controller: MediaController, enablePositionUpdates: Boolean = true) {
         if (this.mediaController != null) return
